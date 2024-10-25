@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs")
 
 let options = {}
 if (process.env.NODE_ENV === 'production'){
-  options.schema = process.env.SCHEMA; // This defines the schema in options object in rend
+  options.schema = process.env.SCHEMA; // This defines the schema in options object in Render
 }
 
 /** @type {import('sequelize-cli').Migration} */

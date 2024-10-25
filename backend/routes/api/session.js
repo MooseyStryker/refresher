@@ -5,7 +5,24 @@ const bcrypt = require('bcryptjs')
 const { setTokenCookie, restoreUser } = require('../../utils/auth')
 const { User } = require('../../db/models')
 
+// This checks our req.body validations
+const { check } = require('express-validator')
+const { handleValidationErrors } = require('../../utils/validation')
+
 const router = express.Router();
+
+// This takes in our express-validator 'check' and looks at the req.body with the handleValidationErrors
+// validateLogin checks the req.body.credential and req.body.password
+const validateLogin = [
+    check('credential')
+        .exists({ checkFalsy: true})
+        .notEmpty
+        .withMessage('Please provide a valid email or username'),
+    check('password')
+        .exists({checkFalsy: true})
+        .withMessage('Please provide a password.'),
+    handleValidationErrors
+]
 
 router.get('/', (req, res) => {
     const { user } = req;
@@ -27,8 +44,10 @@ router.get('/', (req, res) => {
     }
 })
 
-router.post('/', async (req,res,next) => {
+// User Login
+router.post('/', validateLogin, async (req,res,next) => {
     const { credential, password } = req.body
+
     const user = await User.unscoped().findOne({
         where: {
             [Op.or]: {
@@ -59,6 +78,7 @@ router.post('/', async (req,res,next) => {
     })
 })
 
+// User logout
 router.delete('/', (_req, res) => {
     res.clearCookie('token');
     return res.json({
